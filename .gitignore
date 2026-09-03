@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.venv/
+**/.venv/
+.pytest_cache/
+**/.pytest_cache/
+.ruff_cache/
+**/.ruff_cache/
+*.egg-info/
+
+# Run logs from scripts/run_mlb_*.sh -- the capture tree is the artifact, the
+# logs are not.
+logs/
+**/logs/
+
+# Partial writes. core._write_gz stages every payload as <name>.part and only
+# tmp.replace()s it into place once the bytes are complete, so a .part file is
+# by definition an interrupted capture -- never commit one.
+*.part
+
+# OS
+.DS_Store
+Thumbs.db
