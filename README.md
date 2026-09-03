@@ -45,18 +45,34 @@ the manifest it writes is the work list both capture stages filter.
 ## Reading it without cloning
 
 The tree is ~465 MB, so a consumer should read per-game files over HTTP rather
-than clone. Paths are stable and derivable from the schedule — build the URL,
-don't list the directory:
+than clone.
+
+**`mlb/raw/manifest/{season}.csv` is the source of truth for what exists** — one
+row per scheduled game, with `statsapi_path` / `savant_path` filled in only for
+games that were actually captured, alongside `*_bytes` and a `*_sha256` per file
+so a consumer can verify what it downloaded. Fetch only the rows that carry a
+path.
+
+**Do not derive URLs from the schedule.** The schedule lists every scheduled
+game — 2,959 in 2024 — while 2,472 were captured; spring training, exhibitions
+and non-final games are deliberately out of scope, so building a URL per
+scheduled game produces ~487 requests that 404 by design.
 
 ```
-https://raw.githubusercontent.com/sportsdataverse/baseballr-mlb-raw/main/mlb/raw/statsapi/2024/744795.json.gz
-https://raw.githubusercontent.com/sportsdataverse/baseballr-mlb-raw/main/mlb/raw/savant/2024/744795.csv.gz
-https://raw.githubusercontent.com/sportsdataverse/baseballr-mlb-raw/main/mlb/raw/schedule/2024.json.gz
-https://raw.githubusercontent.com/sportsdataverse/baseballr-mlb-raw/main/mlb/raw/manifest/2024.csv
+mlb/raw/manifest/index.csv          one row per season -- read this first, to discover seasons
+mlb/raw/manifest/{season}.csv       one row per game   -- the per-game contract, paths + sha256
+mlb/raw/schedule/{season}.json.gz   the raw schedule feed, for reference
 ```
 
-`mlb/raw/manifest/index.csv` is the one file to read first: one row per season
-with the captured counts and byte totals.
+Paths in the manifest are relative to `mlb/raw/`, so a full URL is the raw base
+plus the path:
+
+```
+https://raw.githubusercontent.com/sportsdataverse/baseballr-mlb-raw/main/mlb/raw/<statsapi_path>
+https://raw.githubusercontent.com/sportsdataverse/baseballr-mlb-raw/main/mlb/raw/<savant_path>
+```
+
+e.g. `statsapi/2024/745444.json.gz` and `savant/2024/745444.csv.gz`.
 
 ## Coverage
 
